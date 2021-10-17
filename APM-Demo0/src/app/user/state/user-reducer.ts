@@ -15,12 +15,11 @@ export interface UserState {
   };
   
   // Selector functions
-  const getUserFeatureState = createFeatureSelector<UserState>('users');
+  const getUserFeatureState = createFeatureSelector<UserState>('user');
   
   export const getMaskUserName = createSelector(
     getUserFeatureState,
-    state => true
-    // state => state.maskUserName //there is a bug
+    state => state.maskUserName //there is a bug
   );
   
   export const getCurrentUser = createSelector(

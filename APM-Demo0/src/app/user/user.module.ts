@@ -16,7 +16,7 @@ const userRoutes: Routes = [
   imports: [
     SharedModule,
     RouterModule.forChild(userRoutes),
-    StoreModule.forFeature('User', userReducer)
+    StoreModule.forFeature('user', userReducer)
   ],
   declarations: [
     LoginComponent
