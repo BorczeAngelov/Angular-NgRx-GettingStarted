@@ -1,21 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { Product } from '../product';
 import { GenericValidator } from '../../shared/generic-validator';
 import { NumberValidators } from '../../shared/number.validator';
 
-import { getCurrentProduct, getError, State } from '../state';
-import { ProductPageActions } from '../state/actions'
-import { Store } from '@ngrx/store';
-import { tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
-
 @Component({
   selector: 'pm-product-edit',
   templateUrl: './product-edit.component.html'
 })
-export class ProductEditComponent implements OnInit {
+export class ProductEditComponent implements OnInit, OnChanges {
   pageTitle = 'Product Edit';
   productForm: FormGroup;
 
@@ -24,12 +18,14 @@ export class ProductEditComponent implements OnInit {
   private validationMessages: { [key: string]: { [key: string]: string } };
   private genericValidator: GenericValidator;
 
-  product$: Observable<Product> | null;
-  errorMessage$: Observable<string> | null;
+  @Input() errorMessage: string;
+  @Input() product: Product;
+  @Output() productWasSaved = new EventEmitter<Product>();
+  @Output() productWasUpdated = new EventEmitter<Product>();
+  @Output() productWasDeleted = new EventEmitter<number>();
+  @Output() currentProductWasCleared = new EventEmitter<void>();
 
-  constructor(
-    private fb: FormBuilder,
-    private store: Store<State>) {
+  constructor(private fb: FormBuilder) {
 
     // Defines all of the validation messages for the form.
     // These could instead be retrieved from a file or database.
@@ -65,14 +61,11 @@ export class ProductEditComponent implements OnInit {
     this.productForm.valueChanges.subscribe(
       () => this.displayMessage = this.genericValidator.processMessages(this.productForm)
     );
-
-    this.errorMessage$ = this.store.select(getError);
-
-    this.product$ = this.store.select(getCurrentProduct).pipe(
-      tap(currentProduct => this.displayProduct(currentProduct)
-      ));
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    this.displayProduct(this.product);
+  }
 
   // Also validate on blur
   // Helpful if the user tabs through required fields
@@ -81,9 +74,7 @@ export class ProductEditComponent implements OnInit {
   }
 
   displayProduct(product: Product | null): void {
-    // // Set the local product property
-    // this.product = product;
-
+    // Set the local product property    
     if (product) {
       // Reset the form back to pristine
       this.productForm.reset();
@@ -114,13 +105,12 @@ export class ProductEditComponent implements OnInit {
   deleteProduct(product: Product): void {
     if (product && product.id) {
       if (confirm(`Really delete the product: ${product.productName}?`)) {
-
-        this.store.dispatch(ProductPageActions.deleteProduct({ productId: product.id }));
+        this.productWasDeleted.emit(product.id);
       }
     }
     else {
       // No need to delete, it was never saved
-      this.store.dispatch(ProductPageActions.clearCurrentProduct());
+      this.currentProductWasCleared.emit();
     }
   }
 
@@ -133,10 +123,10 @@ export class ProductEditComponent implements OnInit {
         const product = { ...originalProduct, ...this.productForm.value };
 
         if (product.id === 0) {
-          this.store.dispatch(ProductPageActions.createProduct({ product: product }));
+          this.productWasSaved.emit(product);
         }
         else {
-          this.store.dispatch(ProductPageActions.updateProduct({ product: product }));
+          this.productWasUpdated.emit(product);
         }
       }
     }
