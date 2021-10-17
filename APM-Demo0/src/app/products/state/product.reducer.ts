@@ -108,11 +108,26 @@ export const productReducer = createReducer<ProductState>(
         return {
             ...state,
             products: updatedProducts,
-            currentProductId: null,
+            currentProductId: action.product.id,
             error: ''
         }
     }),
     on(ProductActions.updateProductFailure, (state, action): ProductState => {
+        return {
+            ...state,
+            error: action.error
+        }
+    }),
+    on(ProductActions.deleteProductSuccess, (state, action): ProductState => {
+        const updatedProducts = state.products.filter(item => item.id != action.productId)
+        return {
+            ...state,
+            products: updatedProducts,
+            currentProductId: null,
+            error: ''
+        }
+    }),
+    on(ProductActions.deleteProductFailure, (state, action): ProductState => {
         return {
             ...state,
             error: action.error

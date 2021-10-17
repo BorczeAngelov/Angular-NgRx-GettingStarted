@@ -6,11 +6,11 @@ import { ProductService } from '../product.service';
 import { GenericValidator } from '../../shared/generic-validator';
 import { NumberValidators } from '../../shared/number.validator';
 
-import { getCurrentProduct, getShowProductCode, State } from '../state/product.reducer';
+import { getCurrentProduct, getError, getShowProductCode, State } from '../state/product.reducer';
 import * as ProductActions from '../state/product.actions'
 import { Store } from '@ngrx/store';
 import { tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'pm-product-edit',
@@ -18,7 +18,6 @@ import { Observable } from 'rxjs';
 })
 export class ProductEditComponent implements OnInit {
   pageTitle = 'Product Edit';
-  errorMessage = '';
   productForm: FormGroup;
 
   // Use with the generic validation message class
@@ -27,6 +26,7 @@ export class ProductEditComponent implements OnInit {
   private genericValidator: GenericValidator;
 
   product$: Observable<Product> | null;
+  errorMessage$: Observable<string> | null;
 
   constructor(
     private fb: FormBuilder,
@@ -63,14 +63,16 @@ export class ProductEditComponent implements OnInit {
       description: ''
     });
 
-    this.product$ = this.store.select(getCurrentProduct).pipe(
-      tap(currentProduct => this.displayProduct(currentProduct)
-      ));
-
     // Watch for value changes for validation
     this.productForm.valueChanges.subscribe(
       () => this.displayMessage = this.genericValidator.processMessages(this.productForm)
     );
+
+    this.errorMessage$ = this.store.select(getError);
+
+    this.product$ = this.store.select(getCurrentProduct).pipe(
+      tap(currentProduct => this.displayProduct(currentProduct)
+      ));
   }
 
 
@@ -114,10 +116,8 @@ export class ProductEditComponent implements OnInit {
   deleteProduct(product: Product): void {
     if (product && product.id) {
       if (confirm(`Really delete the product: ${product.productName}?`)) {
-        this.productService.deleteProduct(product.id).subscribe({
-          next: () => this.store.dispatch(ProductActions.clearCurrentProduct()),
-          error: err => this.errorMessage = err
-        });
+
+        this.store.dispatch(ProductActions.deleteProduct({ productId: product.id }));
       }
     }
     else {
@@ -137,15 +137,10 @@ export class ProductEditComponent implements OnInit {
         if (product.id === 0) {
           this.productService.createProduct(product).subscribe({
             next: p => this.store.dispatch(ProductActions.setCurrentProduct({ currentProductId: p.id })),
-            error: err => this.errorMessage = err
+            error: err => this.errorMessage$ = of(err)
           });
         }
         else {
-          // this.productService.updateProduct(product).subscribe({
-          //   next: p => this.store.dispatch(ProductActions.setCurrentProduct({ currentProductId: p.id })),
-          //   error: err => this.errorMessage = err
-          // });
-
           this.store.dispatch(ProductActions.updateProduct({ product: product }));
         }
       }
