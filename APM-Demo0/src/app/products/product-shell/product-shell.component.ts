@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { Product } from '../product';
 import { getCurrentProduct, getError, getProducts, getShowProductCode, State } from '../state';
-import * as ProductActions from '../state/product.actions'
+import { ProductPageActions } from '../state/actions'
 import { Observable } from 'rxjs';
 
 @Component({
@@ -18,7 +18,7 @@ export class ProductShellComponent implements OnInit {
   constructor(private store: Store<State>) { }
 
   ngOnInit(): void {
-    this.store.dispatch(ProductActions.loadProducts());
+    this.store.dispatch(ProductPageActions.loadProducts());
 
     this.errorMessage$ = this.store.select(getError);
     this.products$ = this.store.select(getProducts);
@@ -27,14 +27,14 @@ export class ProductShellComponent implements OnInit {
   }
 
   checkChanged(): void {
-    this.store.dispatch(ProductActions.toggleProductCode());
+    this.store.dispatch(ProductPageActions.toggleProductCode());
   }
 
   newProduct(): void {
-    this.store.dispatch(ProductActions.initializeCurrentProduct())
+    this.store.dispatch(ProductPageActions.initializeCurrentProduct())
   }
 
   productSelected(product: Product): void {
-    this.store.dispatch(ProductActions.setCurrentProduct({ currentProductId: product.id }));
+    this.store.dispatch(ProductPageActions.setCurrentProduct({ currentProductId: product.id }));
   }
 }
