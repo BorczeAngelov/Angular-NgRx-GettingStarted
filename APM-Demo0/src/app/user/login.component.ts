@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { State } from '../state/app.state';
 
 import { AuthService } from './auth.service';
-import { getMaskUserName } from './state/user-reducer';
+import { getMaskUserName } from './state/user.reducer';
 
 @Component({
   templateUrl: './login.component.html',
