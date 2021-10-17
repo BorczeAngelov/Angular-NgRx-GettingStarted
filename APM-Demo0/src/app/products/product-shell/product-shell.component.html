@@ -1,6 +1,13 @@
 <div class='row'>
   <div class='col-md-5'>
-    <pm-product-list></pm-product-list>
+    <pm-product-list [errorMessage]="errorMessage$ | async"
+                     [displayCode]="displayCode$ | async"
+                     [products]="products$ | async"
+                     [selectedProduct]="selectedProduct$ | async"
+                     (displayCodeChanged)="checkChanged()"
+                     (initializeNewProduct)="newProduct()"
+                     (productWasSelected)="productSelected($any($event))">
+    </pm-product-list>
   </div>
   <div class='col-md-7'>
     <pm-product-edit></pm-product-edit>
