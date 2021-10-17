@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { Product } from '../product';
-import { ProductService } from '../product.service';
 import { GenericValidator } from '../../shared/generic-validator';
 import { NumberValidators } from '../../shared/number.validator';
 
-import { getCurrentProduct, getError, getShowProductCode, State } from '../state/product.reducer';
+import { getCurrentProduct, getError, State } from '../state/product.reducer';
 import * as ProductActions from '../state/product.actions'
 import { Store } from '@ngrx/store';
 import { tap } from 'rxjs/operators';
@@ -30,8 +29,7 @@ export class ProductEditComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private store: Store<State>,
-    private productService: ProductService) {
+    private store: Store<State>) {
 
     // Defines all of the validation messages for the form.
     // These could instead be retrieved from a file or database.
@@ -135,10 +133,7 @@ export class ProductEditComponent implements OnInit {
         const product = { ...originalProduct, ...this.productForm.value };
 
         if (product.id === 0) {
-          this.productService.createProduct(product).subscribe({
-            next: p => this.store.dispatch(ProductActions.setCurrentProduct({ currentProductId: p.id })),
-            error: err => this.errorMessage$ = of(err)
-          });
+          this.store.dispatch(ProductActions.createProduct({ product: product }));
         }
         else {
           this.store.dispatch(ProductActions.updateProduct({ product: product }));

@@ -26,6 +26,19 @@ export class ProductEffects {
             )
     });
 
+    addProduct$ = createEffect(() => {
+        return this.actions$
+            .pipe(
+                ofType(ProductActions.createProduct),
+                concatMap(action =>
+                    this.productService.createProduct(action.product)
+                        .pipe(
+                            map(() => ProductActions.createProductSuccess({ product: action.product })),
+                            catchError(error => of(ProductActions.createProductFailure({ error })))
+                        )
+                )
+            )
+    });
 
     updateProduct$ = createEffect(() => {
         return this.actions$
@@ -40,7 +53,6 @@ export class ProductEffects {
                 )
             )
     });
-
 
     deleteProduct$ = createEffect(() => {
         return this.actions$
