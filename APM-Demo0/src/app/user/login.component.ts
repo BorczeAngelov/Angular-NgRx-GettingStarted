@@ -7,7 +7,7 @@ import { State } from '../state/app.state';
 import * as UserActions from '../user/state/user.actions'
 
 import { AuthService } from './auth.service';
-import { getMaskUserName } from './state/user.reducer';
+import { getMaskUserName } from './state';
 
 @Component({
   templateUrl: './login.component.html',

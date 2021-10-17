@@ -1,4 +1,4 @@
-import { createFeatureSelector, createReducer, createSelector, on } from "@ngrx/store";
+import { createReducer, on } from "@ngrx/store";
 import * as UserActions from '../state/user.actions'
 
 import { User } from "../user";
@@ -14,20 +14,6 @@ const initialState: UserState = {
   maskUserName: true,
   currentUser: null
 };
-
-// Selector functions
-const getUserFeatureState = createFeatureSelector<UserState>('user');
-
-export const getMaskUserName = createSelector(
-  getUserFeatureState,
-  state => state.maskUserName //there is a bug
-);
-
-export const getCurrentUser = createSelector(
-  getUserFeatureState,
-  state => state.currentUser
-);
-
 
 export const userReducer = createReducer<UserState>(
   initialState,
